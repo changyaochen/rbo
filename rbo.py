@@ -86,7 +86,7 @@ class RankingSimilarity(object):
 
 		return cor
 
-	def rbo(self, k=None, p=1.0):
+	def rbo(self, k=None, p=1.0, ext=False):
 		"""
 		This the weighted non-conjoint measures, namely, rank-biased overlap.
 
@@ -112,10 +112,12 @@ class RankingSimilarity(object):
 		p: <float>, default 1.0
 			weight of each agreement at depth d: p**(d-1)
 			when set to 1.0, there is no weight, the rbo returns to average overlap
-
+		ext: <Boolean>, default False
+			If True, we will extropulate the rbo, as in Eq. (23)
+		
 		Return
 		============
-		The rbo at depth k
+		The rbo at depth k (or extrapolated beyond)
 		"""
 
 		if k is None:
@@ -162,7 +164,10 @@ class RankingSimilarity(object):
 			S_running[self.S[d]] = True 
 			T_running[self.T[d]] = True
 
-		return AO[-1]
+		if ext and p < 1:
+			return AO[-1] + A[-1]*p**k
+		else:
+			return AO[-1] 
 
 	def rbo_ext(self, p=0.98):
 		"""
@@ -197,38 +202,45 @@ class RankingSimilarity(object):
 		for d in range(1, l):
 			# PP.printout(d)
 
-			S_running.add(S[d])
-			L_running.add(L[d])
-
-			# again I will revoke the DP-like step
-			overlap_incr = 0  # overlap increament at step d
-
-			# if the new itmes are the same
-			if S[d] == L[d]:
-				overlap_incr += 1
-			else:
-				# if the new item from S is in L already
-				if S[d] in L_running:
-					overlap_incr += 1
-				# if the new item from L is in S already
-				if L[d] in S_running:
-					overlap_incr += 1
-
-			X[d] = X[d-1] + overlap_incr
-			A[d] = 2.0*X[d] / (len(S_running) + len(L_running))  # Eq. (28) that handles the tie. len() is O(1)
-			rbo[d] = rbo[d-1] + 1.0*(1-p)*(p**d) * A[d]	
-
 			if d < s:  # still overlapping in length
+
+				S_running.add(S[d])
+				L_running.add(L[d])
+
+				# again I will revoke the DP-like step
+				overlap_incr = 0  # overlap increament at step d
+
+				# if the new itmes are the same
+				if S[d] == L[d]:
+					overlap_incr += 1
+				else:
+					# if the new item from S is in L already
+					if S[d] in L_running:
+						overlap_incr += 1
+					# if the new item from L is in S already
+					if L[d] in S_running:
+						overlap_incr += 1
+
+				X[d] = X[d-1] + overlap_incr
+				A[d] = 2.0*X[d] / (len(S_running) + len(L_running))  # Eq. (28) that handles the tie. len() is O(1)
+				rbo[d] = rbo[d-1] + 1.0*(1-p)*(p**d) * A[d]	
+			
 				ext_term = 1.0*A[d] * p**(d+1)  # this is the extropulate term
 
 			else:  # the short list has fallen off the cliff
+				L_running.add(L[d])  # we still have the long list
+
+				# now there is one case 
+				overlap_incr = 1 if L[d] in S_running else 0 
+
+				X[d] = X[d-1] + overlap_incr
+				A[d] = 1.0*X[d] / (d+1)	
+				rbo[d] = rbo[d-1] + 1.0*(1-p)*(p**d) * A[d]
+				
 				X_s = X[s-1]  # this the last common overlap
 				disjoint += 1.0*(1-p)*(p**d) * (X_s * (d+1-s) / (d+1) / s)  # second term in first parenthesis of Eq. (32)
-				ext_term = 1.0*((X[d]-X_s)/(d+1) + A[s-1]) * p**(d+1)  # last term in Eq. (32)
+				ext_term = 1.0*((X[d]-X_s)/(d+1) + X[s-1]/s) * p**(d+1)  # last term in Eq. (32)
 
-		# print('X: ', X)
-		# print('A: ', A)
-		# print(rbo)
 		return rbo[-1] + disjoint + ext_term
 
 

@@ -38,6 +38,6 @@ if __name__ == '__main__':
 		RS = RankingSimilarity(Ss[i], Ts[i])
 		print('The implemented Average Overlap is: {:6.3f}'.format(RS.rbo(p=1.0)))
 		print('The correct answer is:              {:6.3f}'.format(As[i]))
-
-		print('The implemented rbo_ext is: {:6.3f}'.format(RS.rbo_ext(p=p)))
+		print('The implemented rbo_ext 1 is: {:6.3f}'.format(RS.rbo(p=p, k=3, ext=True)))
+		print('The implemented rbo_ext 2 is: {:6.3f}'.format(RS.rbo_ext(p=p)))
 
