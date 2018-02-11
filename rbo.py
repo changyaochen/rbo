@@ -16,6 +16,7 @@ class ProgressPrintOut(object):
 	def printout(self, i):
 		print('\r', int(100.0*i / self.N), '%', end='')
 		if i == self.N - 1:
+			print('\r', '100%', end='')
 			print('\nfinished!')
 
 
@@ -65,7 +66,7 @@ class RankingSimilarity(object):
 			# need to build the ranking for the common section
 			# the time complexity should be loglinear, due to the sorting
 			# TODO: can it be faster?
-			
+
 			tmp_dict = {}
 			for i, x in enumerate(L):
 				if x in common_set:
@@ -162,6 +163,74 @@ class RankingSimilarity(object):
 			T_running[self.T[d]] = True
 
 		return AO[-1]
+
+	def rbo_ext(self, p=0.98):
+		"""
+		This is the ultimate implementation of the rbo, namely, the extrapolated version
+		The corresponding formula is Eq. (32) in the rbo paper
+		"""
+
+		# since we are dealing with un-even lists, we need to figure out the 
+		# long (L) and short (S) list first. The name S might be confusing
+		# but in this function, S refers to short list, and L refers to long list
+		if len(self.S) > len(self.T):
+			L, S = self.S, self.T
+		else:
+			S, L = self.S, self.T
+
+		s, l = len(S), len(L)
+
+		# initilize the overlap and rbo arrays
+		# the agreement can be simply calucated from the overlap
+		X, A, rbo = [0 for _ in range(l)], [0 for _ in range(l)], [0 for _ in range(l)]
+		
+		# first item
+		S_running, L_running = set([S[0]]), set(L[0])  # for O(1) look up
+		X[0] = 1 if S[0] == L[0] else 0
+		A[0] = X[0]
+		rbo[0] = 1.0*(1-p)*A[0]
+
+
+		# start the calculation
+		PP = ProgressPrintOut(l)
+		disjoint = 0
+		for d in range(1, l):
+			# PP.printout(d)
+
+			S_running.add(S[d])
+			L_running.add(L[d])
+
+			# again I will revoke the DP-like step
+			overlap_incr = 0  # overlap increament at step d
+
+			# if the new itmes are the same
+			if S[d] == L[d]:
+				overlap_incr += 1
+			else:
+				# if the new item from S is in L already
+				if S[d] in L_running:
+					overlap_incr += 1
+				# if the new item from L is in S already
+				if L[d] in S_running:
+					overlap_incr += 1
+
+			X[d] = X[d-1] + overlap_incr
+			A[d] = 2.0*X[d] / (len(S_running) + len(L_running))  # Eq. (28) that handles the tie. len() is O(1)
+			rbo[d] = rbo[d-1] + 1.0*(1-p)*(p**d) * A[d]	
+
+			if d < s:  # still overlapping in length
+				ext_term = 1.0*A[d] * p**(d+1)  # this is the extropulate term
+
+			else:  # the short list has fallen off the cliff
+				X_s = X[s-1]  # this the last common overlap
+				disjoint += 1.0*(1-p)*(p**d) * (X_s * (d+1-s) / (d+1) / s)  # second term in first parenthesis of Eq. (32)
+				ext_term = 1.0*((X[d]-X_s)/(d+1) + A[s-1]) * p**(d+1)  # last term in Eq. (32)
+
+		# print('X: ', X)
+		# print('A: ', A)
+		# print(rbo)
+		return rbo[-1] + disjoint + ext_term
+
 
 if __name__ == '__main__':
 	S = list('abcde')
