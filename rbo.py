@@ -1,33 +1,3 @@
-"""
-This module is to calculate various measures between 2 ranked lists
-
-Changyao Chen
-Feb. 2018
-"""
-
-from scipy.stats import kendalltau
-import numpy as np
-
-class ProgressPrintOut(object):
-	def __init__(self, N):
-		self._old = 0
-		self._total  = N
-
-	def printout(self, i, delta=10):
-		# print out progess every delta %
-		cur = 100*i // self._total
-		if cur >= self._old + delta:
-			print('\r', 'Current progress: {} %...'.format(cur), end='')
-			self._old = cur
-		if i == self._total - 1:
-			print('\r', 'Current progress: 100 %...', end='')
-			print('\nFinished!')
-
-
-		return
-
-
-
 class RankingSimilarity(object):
 	"""
 	This class will include some similarity measures between two different ranked lists
@@ -36,13 +6,20 @@ class RankingSimilarity(object):
 		"""
 		Input
 		=============
-		S, T: <list>
+		S, T: <list or numpy array>
 			lists with alphanumeric elements. They could be of different lengths. 
 			Both of the them should be ranked, i.e., each element's position reflects 
 			its respective ranking in the list.
+			Also we will require that there is no duplicate element in each list.
 
-			Also we will require that there is no duplicate element in each list
+			Examples of lists:
+			S = ['a', 'b', 'c', 'd', 'e']
+			T = ['b', 'a', 1, 'd']
+
+			Both lists relfect the ranking of the items of interest, for example,
+			list S tells us that item 'a' is ranked first, 'b' is ranked second, etc.
 		"""
+
 		assert(type(S) in [list, np.ndarray])
 		assert(type(T) in [list, np.ndarray])
 
@@ -52,13 +29,13 @@ class RankingSimilarity(object):
 		self.S, self.T = S, T
 		self.N_S, self.N_T = len(S), len(T)
 
+		self.p = 0.5  # just a place holder
 
 	def kendall(self):
 		"""
 		This is the scipy version of Kendall tau.
 		https://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.stats.kendalltau.html
 		Per the doc: 'This is the tau-b version of Kendall’s tau which accounts for ties'
-
 		The Kendall tau can only handle conjoint cases, i.e. the elements in both lists
 		should be the same. 
 		"""
@@ -96,22 +73,17 @@ class RankingSimilarity(object):
 	def rbo(self, k=None, p=1.0, ext=False):
 		"""
 		This the weighted non-conjoint measures, namely, rank-biased overlap.
-
 		Unlike Kendall tau which is correlation based, this is intersection based.
 		The implementation if from Eq. (4) or Eq. (7) (for p != 1) from the RBO paper
 		http://www.williamwebber.com/research/papers/wmz10_tois.pdf
-
 		If p=1, it returns to the un-bounded set-intersection overlap,
 		according to Fagin et al.
 		https://researcher.watson.ibm.com/researcher/files/us-fagin/topk.pdf
-
 		The fig. 5 in that RBO paper can be used as test case.
-
 		Note there the choice of p is of great importance, since it essentically
 		control the 'top-weightness'. Simply put, to an extreme, a small p value will
 		only consider first few items, whereas a larger p value will consider 
 		more itmes. See Eq. (21) for quantitative measure.
-
 		Input
 		=============
 		k: <int>, default None
@@ -138,6 +110,8 @@ class RankingSimilarity(object):
 		else:
 			assert(0.0 < p < 1.0)
 			weights = [1.0*(1-p)*p**d for d in range(k)]
+
+		self.p = p
 		
 		S_running, T_running = {self.S[0]: True}, {self.T[0]: True}  # using dict for O(1) look up
 		A[0] = 1 if self.S[0] == self.T[0] else 0
@@ -146,7 +120,7 @@ class RankingSimilarity(object):
 		PP = ProgressPrintOut(k)
 		for d in range(1, k):
 			
-			PP.printout(d)			
+			PP.printout(d, delta=1)			
 			tmp = 0
 			# if the new item from S is in T already
 			if self.S[d] in T_running:
@@ -182,6 +156,9 @@ class RankingSimilarity(object):
 		The corresponding formula is Eq. (32) in the rbo paper
 		"""
 
+		assert(0.0 < p < 1.0)
+		self.p = p
+
 		# since we are dealing with un-even lists, we need to figure out the 
 		# long (L) and short (S) list first. The name S might be confusing
 		# but in this function, S refers to short list, and L refers to long list
@@ -207,7 +184,7 @@ class RankingSimilarity(object):
 		PP = ProgressPrintOut(l)
 		disjoint = 0
 		for d in range(1, l):
-			PP.printout(d)
+			PP.printout(d, delta=1)
 
 			if d < s:  # still overlapping in length
 
@@ -250,12 +227,58 @@ class RankingSimilarity(object):
 
 		return rbo[-1] + disjoint + ext_term
 
+	def top_weightness(self, p=None, d=None):
+	 	"""
+		This function will evaluate the degree of the top-weightness of the rbo.
+		It is the implementation of Eq. (21) of the rbo paper.
 
-if __name__ == '__main__':
-	S = list('abcde')
-	T = S[::-1][:3]
-	
-	RS = RankingSimilarity(S, T)
-	print(RS.kendall())
+		As a sanity check (per the rbo paper), 
+		top_weightness(p=0.9, d=10) should be 86%
+		top_weightness(p=0.98, d=50) should be 86% too
 
+		Input
+		==================
+		p: <float>, defalut None
+			a value between zero and one
+		d: <int>, default None
+			evaluation depth of the list
+	 	""" 
 
+	 	# sanity check
+	 	if p is None:
+	 		p = self.p
+	 	assert (0.<p<1.0)
+	 	
+	 	if d is None:
+	 		d = min(self.N_S, self.N_T)
+	 	else:
+	 		d = min(self.N_S, self.N_T, int(d))
+
+	 	if d == 1:
+	 		top_w = 1 - 1 + 1.0*(1-p)/p * (np.log(1.0/(1-p)))
+	 	else:
+		 	sum_1 = 0
+		 	for i in range(1, d):
+		 		sum_1 += 1.0*p**(i) / i 
+		 	top_w = 1 - p**(i) + 1.0*(1-p)/p * (i+1) * (np.log(1.0/(1-p)) - sum_1)  # here i == d-1
+
+	 	print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
+
+	 	return top_w
+
+class ProgressPrintOut(object):
+	def __init__(self, N):
+		self._old = 0
+		self._total  = N
+
+	def printout(self, i, delta=10):
+		# print out progess every delta %
+		cur = 100*i // self._total
+		if cur >= self._old + delta:
+			print('\r', 'Current progress: {} %...'.format(cur), end='')
+			self._old = cur
+		if i == self._total - 1:
+			print('\r', 'Current progress: 100 %...', end='')
+			print('\nFinished!')
+
+		retur
