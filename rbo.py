@@ -84,8 +84,8 @@ class RankingSimilarity(object):
 
 			return L_rank
 
-		S_rank = common_ranking(S, common_elements)
-		T_rank = common_ranking(T, common_elements)					
+		S_rank = common_ranking(self.S, common_elements)
+		T_rank = common_ranking(self.T, common_elements)					
 
 		# print(S_rank)
 		# print(T_rank)
