@@ -9,15 +9,22 @@ from scipy.stats import kendalltau
 import numpy as np
 
 class ProgressPrintOut(object):
-
 	def __init__(self, N):
-		self.N = N
+		self._old = 0
+		self._total  = N
 
-	def printout(self, i):
-		print('\r', int(100.0*i / self.N), '%', end='')
-		if i == self.N - 1:
-			print('\r', '100%', end='')
-			print('\nfinished!')
+	def printout(self, i, delta=10):
+		# print out progess every delta %
+		cur = 100*i // self._total
+		if cur >= self._old + delta:
+			print('\r', 'Current progress: {} %...'.format(cur), end='')
+			self._old = cur
+		if i == self._total - 1:
+			print('\r', 'Current progress: 100 %...', end='')
+			print('\nFinished!')
+
+
+		return
 
 
 
@@ -190,7 +197,7 @@ class RankingSimilarity(object):
 		X, A, rbo = [0 for _ in range(l)], [0 for _ in range(l)], [0 for _ in range(l)]
 		
 		# first item
-		S_running, L_running = set([S[0]]), set(L[0])  # for O(1) look up
+		S_running, L_running = set([S[0]]), set([L[0]])  # for O(1) look up
 		X[0] = 1 if S[0] == L[0] else 0
 		A[0] = X[0]
 		rbo[0] = 1.0*(1-p)*A[0]
@@ -200,7 +207,7 @@ class RankingSimilarity(object):
 		PP = ProgressPrintOut(l)
 		disjoint = 0
 		for d in range(1, l):
-			# PP.printout(d)
+			PP.printout(d)
 
 			if d < s:  # still overlapping in length
 
