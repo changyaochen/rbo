@@ -1,3 +1,6 @@
+import numpy as np
+from scipy.stats import kendalltau
+
 class RankingSimilarity(object):
 	"""
 	This class will include some similarity measures between two different ranked lists
@@ -281,4 +284,4 @@ class ProgressPrintOut(object):
 			print('\r', 'Current progress: 100 %...', end='')
 			print('\nFinished!')
 
-		retur
+		return

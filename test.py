@@ -8,22 +8,25 @@ if __name__ == '__main__':
 
 	Ss = [
 			list('abcdefghijklmnopqrstuvwxyz'),  # sanity check
-			list('abcdefg'),	 # this is from the fig.5 for the RBO paper
 			list('abcdefghijklmnopqrstuvwxyz'),
+			list('abcde'),
+			list('abcdefg'),	 # this is from the fig.5 for the RBO paper
 			list('abcde'),  # this is from  https://ragrawal.wordpress.com/2013/01/18/comparing-ranked-list/
 			list('abcde'),  # this is from  https://ragrawal.wordpress.com/2013/01/18/comparing-ranked-list/
 			]
 	Ts = [
 			list('abcdefghijklmnopqrstuvwxyz'),
-			list('zcavwxy'),
 			list('abcdefg'),
+			list('fghij'),
+			list('zcavwxy'),
 			list('bacde'),
 			list('abced'),
 			]
 	As = [
 			1.,
+			1.,
+			0.,
 			0.312,
-			1,
 			0.8,
 			0.95
 	]
