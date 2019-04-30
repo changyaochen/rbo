@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.stats import kendalltau
 
 class RankingSimilarity(object):
 	"""
@@ -33,45 +32,6 @@ class RankingSimilarity(object):
 		self.N_S, self.N_T = len(S), len(T)
 
 		self.p = 0.5  # just a place holder
-
-	def kendall(self):
-		"""
-		This is the scipy version of Kendall tau.
-		https://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.stats.kendalltau.html
-		Per the doc: 'This is the tau-b version of Kendall’s tau which accounts for ties'
-		The Kendall tau can only handle conjoint cases, i.e. the elements in both lists
-		should be the same. 
-		"""
-		
-		common_elements = set(self.S) & set(self.T)
-		N_c = len(common_elements)
-		print('The number of common elements is {}'.format(N_c))
-		print('The proportion used in list S is {:6.3f}%.'.format(100.0*N_c / self.N_S))
-		print('The proportion used in list T is {:6.3f}%.'.format(100.0*N_c / self.N_T))
-		
-		def common_ranking(L, common_set):
-			# need to build the ranking for the common section
-			# the time complexity should be loglinear, due to the sorting
-			# TODO: can it be faster?
-
-			tmp_dict = {}
-			for i, x in enumerate(L):
-				if x in common_set:
-					tmp_dict[x] = i
-
-			# the item in the ranking is sorted, to be consistent
-			L_rank = list(map(tmp_dict.get, sorted(tmp_dict.keys())))
-
-			return L_rank
-
-		S_rank = common_ranking(self.S, common_elements)
-		T_rank = common_ranking(self.T, common_elements)					
-
-		# print(S_rank)
-		# print(T_rank)
-		cor, pval = kendalltau(S_rank, T_rank)
-
-		return cor
 
 	def rbo(self, k=None, p=1.0, ext=False):
 		"""
