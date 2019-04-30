@@ -13,6 +13,8 @@ if __name__ == '__main__':
 			list('abcdefg'),	 # this is from the fig.5 for the RBO paper
 			list('abcde'),  # this is from  https://ragrawal.wordpress.com/2013/01/18/comparing-ranked-list/
 			list('abcde'),  # this is from  https://ragrawal.wordpress.com/2013/01/18/comparing-ranked-list/
+			list('a'),
+			list('a')
 			]
 	Ts = [
 			list('abcdefghijklmnopqrstuvwxyz'),
@@ -21,6 +23,8 @@ if __name__ == '__main__':
 			list('zcavwxy'),
 			list('bacde'),
 			list('abced'),
+			list('a'),
+			list('b'),
 			]
 	As = [
 			1.,
@@ -28,7 +32,9 @@ if __name__ == '__main__':
 			0.,
 			0.312,
 			0.8,
-			0.95
+			0.95,
+			1.,
+			0,
 	]
 
 	p = 0.95

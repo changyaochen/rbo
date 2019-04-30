@@ -146,6 +146,8 @@ class RankingSimilarity(object):
 		# start the calculation
 		PP = ProgressPrintOut(l)
 		disjoint = 0
+		ext_term = A[0] * p
+
 		for d in range(1, l):
 			PP.printout(d, delta=1)
 
