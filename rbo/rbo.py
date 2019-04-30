@@ -4,7 +4,7 @@ class RankingSimilarity(object):
 	"""
 	This class will include some similarity measures between two different ranked lists
 	"""
-	def __init__(self, S, T):
+	def __init__(self, S, T, verbose=False):
 		"""
 		Input
 		=============
@@ -30,7 +30,7 @@ class RankingSimilarity(object):
 		
 		self.S, self.T = S, T
 		self.N_S, self.N_T = len(S), len(T)
-
+		self.verbose = verbose
 		self.p = 0.5  # just a place holder
 
 	def rbo(self, k=None, p=1.0, ext=False):
@@ -80,7 +80,7 @@ class RankingSimilarity(object):
 		A[0] = 1 if self.S[0] == self.T[0] else 0
 		AO[0] = weights[0] if self.S[0] == self.T[0] else 0
 
-		PP = ProgressPrintOut(k)
+		PP = ProgressPrintOut(k) if self.verbose else NoPrintOut()
 		for d in range(1, k):
 			
 			PP.printout(d, delta=1)			
@@ -144,7 +144,7 @@ class RankingSimilarity(object):
 
 
 		# start the calculation
-		PP = ProgressPrintOut(l)
+		PP = ProgressPrintOut(l) if self.verbose else NoPrintOut()
 		disjoint = 0
 		ext_term = A[0] * p
 
@@ -247,3 +247,7 @@ class ProgressPrintOut(object):
 			print('\nFinished!')
 
 		return
+
+class NoPrintOut(object):
+	def printout(self, i, delta=10):
+		pass

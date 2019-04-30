@@ -44,7 +44,7 @@ if __name__ == '__main__':
 		print('List 1 is: {}'.format(Ss[i]))
 		print('List 2 is: {}'.format(Ts[i]))
 
-		RS = RankingSimilarity(Ss[i], Ts[i])
+		RS = RankingSimilarity(Ss[i], Ts[i], verbose=True)
 		print('The implemented Average Overlap is: {:6.3f}'.format(RS.rbo(p=1.0)))
 		print('The correct answer is:              {:6.3f}'.format(As[i]))
 		print('The implemented rbo_ext 1 is: {:6.3f}'.format(RS.rbo(p=p, k=3, ext=True)))
