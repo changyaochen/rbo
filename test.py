@@ -1,7 +1,7 @@
 """
 This module contains some test cases.
 """
-
+import numpy as np
 from rbo import RankingSimilarity
 
 if __name__ == '__main__':
@@ -45,8 +45,12 @@ if __name__ == '__main__':
 		print('List 2 is: {}'.format(Ts[i]))
 
 		RS = RankingSimilarity(Ss[i], Ts[i], verbose=True)
-		print('The implemented Average Overlap is: {:6.3f}'.format(RS.rbo(p=1.0)))
-		print('The correct answer is:              {:6.3f}'.format(As[i]))
+		rbo = RS.rbo(p=1.0)
+		expected = As[i]
+		print('The implemented Average Overlap is: {:6.3f}'.format(rbo))
+		print('The correct answer is:              {:6.3f}'.format(expected))
+		assert np.round(rbo, decimals=3) == expected
+
 		print('The implemented rbo_ext 1 is: {:6.3f}'.format(RS.rbo(p=p, k=3, ext=True)))
 		print('The implemented rbo_ext 2 is: {:6.3f}'.format(RS.rbo_ext(p=p)))
 
