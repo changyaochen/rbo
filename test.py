@@ -1,7 +1,7 @@
 """
 This module contains some test cases.
 """
-
+import numpy as np
 from rbo import RankingSimilarity
 
 if __name__ == '__main__':
@@ -13,6 +13,8 @@ if __name__ == '__main__':
 			list('abcdefg'),	 # this is from the fig.5 for the RBO paper
 			list('abcde'),  # this is from  https://ragrawal.wordpress.com/2013/01/18/comparing-ranked-list/
 			list('abcde'),  # this is from  https://ragrawal.wordpress.com/2013/01/18/comparing-ranked-list/
+			list('a'),
+			list('a')
 			]
 	Ts = [
 			list('abcdefghijklmnopqrstuvwxyz'),
@@ -21,6 +23,8 @@ if __name__ == '__main__':
 			list('zcavwxy'),
 			list('bacde'),
 			list('abced'),
+			list('a'),
+			list('b'),
 			]
 	As = [
 			1.,
@@ -28,7 +32,9 @@ if __name__ == '__main__':
 			0.,
 			0.312,
 			0.8,
-			0.95
+			0.95,
+			1.,
+			0,
 	]
 
 	p = 0.95
@@ -38,9 +44,13 @@ if __name__ == '__main__':
 		print('List 1 is: {}'.format(Ss[i]))
 		print('List 2 is: {}'.format(Ts[i]))
 
-		RS = RankingSimilarity(Ss[i], Ts[i])
-		print('The implemented Average Overlap is: {:6.3f}'.format(RS.rbo(p=1.0)))
-		print('The correct answer is:              {:6.3f}'.format(As[i]))
+		RS = RankingSimilarity(Ss[i], Ts[i], verbose=True)
+		rbo = RS.rbo(p=1.0)
+		expected = As[i]
+		print('The implemented Average Overlap is: {:6.3f}'.format(rbo))
+		print('The correct answer is:              {:6.3f}'.format(expected))
+		assert np.round(rbo, decimals=3) == expected
+
 		print('The implemented rbo_ext 1 is: {:6.3f}'.format(RS.rbo(p=p, k=3, ext=True)))
 		print('The implemented rbo_ext 2 is: {:6.3f}'.format(RS.rbo_ext(p=p)))
 
