@@ -61,6 +61,11 @@ class RankingSimilarity(object):
 		============
 		The rbo at depth k (or extrapolated beyond)
 		"""
+		if not self.N_S and not self.N_T:
+			return 1 # both lists are empty
+
+		if not self.N_S or not self.N_T:
+			return 0 # one list empty, one non-empty
 
 		if k is None:
 			k = float('inf')
@@ -121,6 +126,12 @@ class RankingSimilarity(object):
 
 		assert(0.0 < p < 1.0)
 		self.p = p
+
+		if not self.N_S and not self.N_T:
+			return 1 # both lists are empty
+
+		if not self.N_S or not self.N_T:
+			return 0 # one list empty, one non-empty
 
 		# since we are dealing with un-even lists, we need to figure out the 
 		# long (L) and short (S) list first. The name S might be confusing
@@ -219,7 +230,9 @@ class RankingSimilarity(object):
 		else:
 			d = min(self.N_S, self.N_T, int(d))
 
-		if d == 1:
+		if d == 0:
+			top_w = 1
+		elif d == 1:
 			top_w = 1 - 1 + 1.0*(1-p)/p * (np.log(1.0/(1-p)))
 		else:
 			sum_1 = 0
