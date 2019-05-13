@@ -67,7 +67,7 @@ class RankingSimilarity(object):
 		k = min(self.N_S, self.N_T, k)
 		
 		# initilize the agreement and average overlap arrays
-		A, AO = [0 for _ in range(k)], [0 for _ in range(k)]
+		A, AO = [0] * k, [0] * k
 		if p == 1.0:
 			weights = [1.0 for _ in range(k)]
 		else:
@@ -91,7 +91,7 @@ class RankingSimilarity(object):
 			# if the new item from T is in S already
 			if self.T[d] in S_running:
 				tmp += 1
-			# if the new itmes are the same, which also means the previous two cases didn't happen
+			# if the new items are the same, which also means the previous two cases didn't happen
 			if self.S[d] == self.T[d]:
 				tmp += 1
 
@@ -133,11 +133,11 @@ class RankingSimilarity(object):
 		s, l = len(S), len(L)
 
 		# initilize the overlap and rbo arrays
-		# the agreement can be simply calucated from the overlap
-		X, A, rbo = [0 for _ in range(l)], [0 for _ in range(l)], [0 for _ in range(l)]
+		# the agreement can be simply calculated from the overlap
+		X, A, rbo = [0] * l, [0] * l, [0] * l
 		
 		# first item
-		S_running, L_running = set([S[0]]), set([L[0]])  # for O(1) look up
+		S_running, L_running = {S[0]}, {L[0]}  # for O(1) look up
 		X[0] = 1 if S[0] == L[0] else 0
 		A[0] = X[0]
 		rbo[0] = 1.0*(1-p)*A[0]
@@ -227,9 +227,11 @@ class RankingSimilarity(object):
 				sum_1 += 1.0*p**(i) / i 
 			top_w = 1 - p**(i) + 1.0*(1-p)/p * (i+1) * (np.log(1.0/(1-p)) - sum_1)  # here i == d-1
 
-		print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
+		if self.verbose:
+			print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
 
 		return top_w
+
 
 class ProgressPrintOut(object):
 	def __init__(self, N):
