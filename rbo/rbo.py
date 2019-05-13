@@ -193,7 +193,7 @@ class RankingSimilarity(object):
 		return rbo[-1] + disjoint + ext_term
 
 	def top_weightness(self, p=None, d=None):
-	 	"""
+		"""
 		This function will evaluate the degree of the top-weightness of the rbo.
 		It is the implementation of Eq. (21) of the rbo paper.
 
@@ -207,29 +207,29 @@ class RankingSimilarity(object):
 			a value between zero and one
 		d: <int>, default None
 			evaluation depth of the list
-	 	""" 
+		""" 
 
-	 	# sanity check
-	 	if p is None:
-	 		p = self.p
-	 	assert (0.<p<1.0)
-	 	
-	 	if d is None:
-	 		d = min(self.N_S, self.N_T)
-	 	else:
-	 		d = min(self.N_S, self.N_T, int(d))
+		# sanity check
+		if p is None:
+			p = self.p
+		assert (0.<p<1.0)
+		
+		if d is None:
+			d = min(self.N_S, self.N_T)
+		else:
+			d = min(self.N_S, self.N_T, int(d))
 
-	 	if d == 1:
-	 		top_w = 1 - 1 + 1.0*(1-p)/p * (np.log(1.0/(1-p)))
-	 	else:
-		 	sum_1 = 0
-		 	for i in range(1, d):
-		 		sum_1 += 1.0*p**(i) / i 
-		 	top_w = 1 - p**(i) + 1.0*(1-p)/p * (i+1) * (np.log(1.0/(1-p)) - sum_1)  # here i == d-1
+		if d == 1:
+			top_w = 1 - 1 + 1.0*(1-p)/p * (np.log(1.0/(1-p)))
+		else:
+			sum_1 = 0
+			for i in range(1, d):
+				sum_1 += 1.0*p**(i) / i 
+			top_w = 1 - p**(i) + 1.0*(1-p)/p * (i+1) * (np.log(1.0/(1-p)) - sum_1)  # here i == d-1
 
-	 	print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
+		print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
 
-	 	return top_w
+		return top_w
 
 class ProgressPrintOut(object):
 	def __init__(self, N):
