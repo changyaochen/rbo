@@ -61,13 +61,18 @@ class RankingSimilarity(object):
 		============
 		The rbo at depth k (or extrapolated beyond)
 		"""
+		if not self.N_S and not self.N_T:
+			return 1 # both lists are empty
+
+		if not self.N_S or not self.N_T:
+			return 0 # one list empty, one non-empty
 
 		if k is None:
 			k = float('inf')
 		k = min(self.N_S, self.N_T, k)
 		
 		# initilize the agreement and average overlap arrays
-		A, AO = [0 for _ in range(k)], [0 for _ in range(k)]
+		A, AO = [0] * k, [0] * k
 		if p == 1.0:
 			weights = [1.0 for _ in range(k)]
 		else:
@@ -91,7 +96,7 @@ class RankingSimilarity(object):
 			# if the new item from T is in S already
 			if self.T[d] in S_running:
 				tmp += 1
-			# if the new itmes are the same, which also means the previous two cases didn't happen
+			# if the new items are the same, which also means the previous two cases didn't happen
 			if self.S[d] == self.T[d]:
 				tmp += 1
 
@@ -122,6 +127,12 @@ class RankingSimilarity(object):
 		assert(0.0 < p < 1.0)
 		self.p = p
 
+		if not self.N_S and not self.N_T:
+			return 1 # both lists are empty
+
+		if not self.N_S or not self.N_T:
+			return 0 # one list empty, one non-empty
+
 		# since we are dealing with un-even lists, we need to figure out the 
 		# long (L) and short (S) list first. The name S might be confusing
 		# but in this function, S refers to short list, and L refers to long list
@@ -133,11 +144,11 @@ class RankingSimilarity(object):
 		s, l = len(S), len(L)
 
 		# initilize the overlap and rbo arrays
-		# the agreement can be simply calucated from the overlap
-		X, A, rbo = [0 for _ in range(l)], [0 for _ in range(l)], [0 for _ in range(l)]
+		# the agreement can be simply calculated from the overlap
+		X, A, rbo = [0] * l, [0] * l, [0] * l
 		
 		# first item
-		S_running, L_running = set([S[0]]), set([L[0]])  # for O(1) look up
+		S_running, L_running = {S[0]}, {L[0]}  # for O(1) look up
 		X[0] = 1 if S[0] == L[0] else 0
 		A[0] = X[0]
 		rbo[0] = 1.0*(1-p)*A[0]
@@ -193,7 +204,7 @@ class RankingSimilarity(object):
 		return rbo[-1] + disjoint + ext_term
 
 	def top_weightness(self, p=None, d=None):
-	 	"""
+		"""
 		This function will evaluate the degree of the top-weightness of the rbo.
 		It is the implementation of Eq. (21) of the rbo paper.
 
@@ -207,29 +218,33 @@ class RankingSimilarity(object):
 			a value between zero and one
 		d: <int>, default None
 			evaluation depth of the list
-	 	""" 
+		""" 
 
-	 	# sanity check
-	 	if p is None:
-	 		p = self.p
-	 	assert (0.<p<1.0)
-	 	
-	 	if d is None:
-	 		d = min(self.N_S, self.N_T)
-	 	else:
-	 		d = min(self.N_S, self.N_T, int(d))
+		# sanity check
+		if p is None:
+			p = self.p
+		assert (0.<p<1.0)
+		
+		if d is None:
+			d = min(self.N_S, self.N_T)
+		else:
+			d = min(self.N_S, self.N_T, int(d))
 
-	 	if d == 1:
-	 		top_w = 1 - 1 + 1.0*(1-p)/p * (np.log(1.0/(1-p)))
-	 	else:
-		 	sum_1 = 0
-		 	for i in range(1, d):
-		 		sum_1 += 1.0*p**(i) / i 
-		 	top_w = 1 - p**(i) + 1.0*(1-p)/p * (i+1) * (np.log(1.0/(1-p)) - sum_1)  # here i == d-1
+		if d == 0:
+			top_w = 1
+		elif d == 1:
+			top_w = 1 - 1 + 1.0*(1-p)/p * (np.log(1.0/(1-p)))
+		else:
+			sum_1 = 0
+			for i in range(1, d):
+				sum_1 += 1.0*p**(i) / i 
+			top_w = 1 - p**(i) + 1.0*(1-p)/p * (i+1) * (np.log(1.0/(1-p)) - sum_1)  # here i == d-1
 
-	 	print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
+		if self.verbose:
+			print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
 
-	 	return top_w
+		return top_w
+
 
 class ProgressPrintOut(object):
 	def __init__(self, N):
