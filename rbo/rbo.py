@@ -35,6 +35,14 @@ class RankingSimilarity(object):
         self.verbose = verbose
         self.p = 0.5  # just a place holder
 
+    def _bound_range(self, value):
+        """Bounds the value to [0.0, 1.0].
+        """
+        larger_than_zero = max(0.0, value)
+        less_than_one = min(1.0, larger_than_zero)
+
+        return less_than_one
+
     def rbo(self, k=None, p=1.0, ext=False):
         """
         This the weighted non-conjoint measures, namely, rank-biased overlap.
@@ -120,9 +128,9 @@ class RankingSimilarity(object):
             T_running[self.T[d]] = True
 
         if ext and p < 1:
-            return AO[-1] + A[-1] * p**k
+            return self._bound_range(AO[-1] + A[-1] * p**k)
         else:
-            return AO[-1]
+            return self._bound_range(AO[-1])
 
     def rbo_ext(self, p=0.98):
         """
@@ -210,7 +218,7 @@ class RankingSimilarity(object):
                 ext_term = 1.0 * ((X[d] - X_s) / (d + 1) + X[s - 1] / s) * \
                     p**(d + 1)  # last term in Eq. (32)
 
-        return rbo[-1] + disjoint + ext_term
+        return self._bound_range(rbo[-1] + disjoint + ext_term)
 
     def top_weightness(self, p=None, d=None):
         """
@@ -254,7 +262,7 @@ class RankingSimilarity(object):
             print('The first {} ranks have {:6.3%} of the weight of '
                   'the evaluation.'.format(d, top_w))
 
-        return top_w
+        return self._bound_range(top_w)
 
 
 class ProgressPrintOut(object):
