@@ -3,24 +3,25 @@ import numpy as np
 
 class RankingSimilarity(object):
     """
-    This class will include some similarity measures between two different ranked lists
+    This class will include some similarity measures between two different
+    ranked lists.
     """
     def __init__(self, S, T, verbose=False):
         """
-        Input
-        =============
-        S, T: <list or numpy array>
-            lists with alphanumeric elements. They could be of different lengths.
-            Both of the them should be ranked, i.e., each element's position reflects
-            its respective ranking in the list.
-            Also we will require that there is no duplicate element in each list.
+        Initialize the object with the required lists.
+        Examples of lists:
+        S = ['a', 'b', 'c', 'd', 'e']
+        T = ['b', 'a', 1, 'd']
 
-            Examples of lists:
-            S = ['a', 'b', 'c', 'd', 'e']
-            T = ['b', 'a', 1, 'd']
+        Both lists relfect the ranking of the items of interest, for example,
+        list S tells us that item 'a' is ranked first, 'b' is ranked second, etc.
 
-            Both lists relfect the ranking of the items of interest, for example,
-            list S tells us that item 'a' is ranked first, 'b' is ranked second, etc.
+        Args:
+            S, T (list or numpy array): lists with alphanumeric elements. They
+                could be of different lengths. Both of the them should be
+                ranked, i.e., each element's position reflects its respective
+                ranking in the list. Also we will require that there is no
+                duplicate element in each list.
         """
 
         assert(type(S) in [list, np.ndarray])
@@ -37,31 +38,33 @@ class RankingSimilarity(object):
     def rbo(self, k=None, p=1.0, ext=False):
         """
         This the weighted non-conjoint measures, namely, rank-biased overlap.
-        Unlike Kendall tau which is correlation based, this is intersection based.
-        The implementation if from Eq. (4) or Eq. (7) (for p != 1) from the RBO paper
-        http://www.williamwebber.com/research/papers/wmz10_tois.pdf
-        If p=1, it returns to the un-bounded set-intersection overlap,
-        according to Fagin et al.
+        Unlike Kendall tau which is correlation based, this is intersection
+        based.
+        The implementation if from Eq. (4) or Eq. (7) (for p != 1) from the RBO
+        paper: http://www.williamwebber.com/research/papers/wmz10_tois.pdf
+
+        If p=1, it returns to the un-bounded set-intersection overlap, according
+        to Fagin et al.
         https://researcher.watson.ibm.com/researcher/files/us-fagin/topk.pdf
+
         The fig. 5 in that RBO paper can be used as test case.
         Note there the choice of p is of great importance, since it essentically
-        control the 'top-weightness'. Simply put, to an extreme, a small p value will
-        only consider first few items, whereas a larger p value will consider
-        more itmes. See Eq. (21) for quantitative measure.
-        Input
-        =============
-        k: <int>, default None
-            The depth of evaluation
-        p: <float>, default 1.0
-            weight of each agreement at depth d: p**(d-1)
-            when set to 1.0, there is no weight, the rbo returns to average overlap
-        ext: <Boolean>, default False
-            If True, we will extropulate the rbo, as in Eq. (23)
+        control the 'top-weightness'. Simply put, to an extreme, a small p value
+        will only consider first few items, whereas a larger p value will
+        consider more itmes. See Eq. (21) for quantitative measure.
 
-        Return
-        ============
-        The rbo at depth k (or extrapolated beyond)
+        Args:
+            k (int), default None: The depth of evaluation.
+            p (float), default 1.0: Weight of each agreement at depth d:
+                p**(d-1). When set to 1.0, there is no weight, the rbo returns
+                to average overlap.
+            ext (Boolean) default False: If True, we will extropulate the rbo,
+                as in Eq. (23)
+
+        Returns:
+            The rbo at depth k (or extrapolated beyond)
         """
+
         if not self.N_S and not self.N_T:
             return 1  # both lists are empty
 
@@ -82,7 +85,8 @@ class RankingSimilarity(object):
 
         self.p = p
 
-        S_running, T_running = {self.S[0]: True}, {self.T[0]: True}  # using dict for O(1) look up
+        # using dict for O(1) look up
+        S_running, T_running = {self.S[0]: True}, {self.T[0]: True}
         A[0] = 1 if self.S[0] == self.T[0] else 0
         AO[0] = weights[0] if self.S[0] == self.T[0] else 0
 
@@ -97,7 +101,8 @@ class RankingSimilarity(object):
             # if the new item from T is in S already
             if self.T[d] in S_running:
                 tmp += 1
-            # if the new items are the same, which also means the previous two cases didn't happen
+            # if the new items are the same, which also means the previous
+            # two cases didn't happen
             if self.S[d] == self.T[d]:
                 tmp += 1
 
@@ -121,8 +126,8 @@ class RankingSimilarity(object):
 
     def rbo_ext(self, p=0.98):
         """
-        This is the ultimate implementation of the rbo, namely, the extrapolated version
-        The corresponding formula is Eq. (32) in the rbo paper
+        This is the ultimate implementation of the rbo, namely, the extrapolated
+        version. The corresponding formula is Eq. (32) in the rbo paper
         """
 
         assert(0.0 < p < 1.0)
@@ -136,7 +141,7 @@ class RankingSimilarity(object):
 
         # since we are dealing with un-even lists, we need to figure out the
         # long (L) and short (S) list first. The name S might be confusing
-        # but in this function, S refers to short list, and L refers to long list
+        # but in this function, S refers to short list, L refers to long list
         if len(self.S) > len(self.T):
             L, S = self.S, self.T
         else:
@@ -182,10 +187,11 @@ class RankingSimilarity(object):
                         overlap_incr += 1
 
                 X[d] = X[d - 1] + overlap_incr
-                A[d] = 2.0 * X[d] / (len(S_running) + len(L_running))  # Eq. (28) that handles the tie. len() is O(1)
+                # Eq. (28) that handles the tie. len() is O(1)
+                A[d] = 2.0 * X[d] / (len(S_running) + len(L_running))
                 rbo[d] = rbo[d - 1] + 1.0 * (1 - p) * (p**d) * A[d]
 
-                ext_term = 1.0 * A[d] * p**(d + 1)  # this is the extropulate term
+                ext_term = 1.0 * A[d] * p**(d + 1)  # the extropulate term
 
             else:  # the short list has fallen off the cliff
                 L_running.add(L[d])  # we still have the long list
@@ -198,8 +204,11 @@ class RankingSimilarity(object):
                 rbo[d] = rbo[d - 1] + 1.0 * (1 - p) * (p**d) * A[d]
 
                 X_s = X[s - 1]  # this the last common overlap
-                disjoint += 1.0 * (1 - p) * (p**d) * (X_s * (d + 1 - s) / (d + 1) / s)  # second term in first parenthesis of Eq. (32)
-                ext_term = 1.0 * ((X[d] - X_s) / (d + 1) + X[s - 1] / s) * p**(d + 1)  # last term in Eq. (32)
+                # second term in first parenthesis of Eq. (32)
+                disjoint += 1.0 * (1 - p) * (p**d) * \
+                    (X_s * (d + 1 - s) / (d + 1) / s)
+                ext_term = 1.0 * ((X[d] - X_s) / (d + 1) + X[s - 1] / s) * \
+                    p**(d + 1)  # last term in Eq. (32)
 
         return rbo[-1] + disjoint + ext_term
 
@@ -212,12 +221,12 @@ class RankingSimilarity(object):
         top_weightness(p=0.9, d=10) should be 86%
         top_weightness(p=0.98, d=50) should be 86% too
 
-        Input
-        ==================
-        p: <float>, defalut None
-            a value between zero and one
-        d: <int>, default None
-            evaluation depth of the list
+        Args:
+            p (float), defalut None: A value between zero and one.
+            d (int), default None: Evaluation depth of the list.
+
+        Returns:
+            A float between [0, 1], that indicates the top-weightness.
         """
 
         # sanity check
@@ -238,15 +247,19 @@ class RankingSimilarity(object):
             sum_1 = 0
             for i in range(1, d):
                 sum_1 += 1.0 * p**(i) / i
-            top_w = 1 - p**(i) + 1.0 * (1 - p) / p * (i + 1) * (np.log(1.0 / (1 - p)) - sum_1)  # here i == d-1
+            top_w = 1 - p**(i) + 1.0 * (1 - p) / p * (i + 1) * \
+                (np.log(1.0 / (1 - p)) - sum_1)  # here i == d-1
 
         if self.verbose:
-            print('The first {} ranks have {:6.3%} of the weight of the evaluation.'.format(d, top_w))
+            print('The first {} ranks have {:6.3%} of the weight of '
+                  'the evaluation.'.format(d, top_w))
 
         return top_w
 
 
 class ProgressPrintOut(object):
+    """Quick status print out.
+    """
     def __init__(self, N):
         self._old = 0
         self._total  = N
