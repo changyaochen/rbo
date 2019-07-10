@@ -14,5 +14,6 @@ package_test:
 	python -c "import rbo; assert rbo.RankingSimilarity([1], [1]).rbo() == 1"
 
 test: package_test
+	. $(RBO_VENV)/bin/activate  && \
 	python test.py && \
 	rm -rf build dist *.egg-info $(RBO_VENV)
