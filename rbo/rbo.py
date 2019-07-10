@@ -6,6 +6,7 @@ class RankingSimilarity(object):
     This class will include some similarity measures between two different
     ranked lists.
     """
+
     def __init__(self, S, T, verbose=False):
         """
         Initialize the object with the required lists.
@@ -38,10 +39,16 @@ class RankingSimilarity(object):
     def _bound_range(self, value):
         """Bounds the value to [0.0, 1.0].
         """
-        larger_than_zero = max(0.0, value)
-        less_than_one = min(1.0, larger_than_zero)
 
-        return less_than_one
+        try:
+            assert(0 <= value <= 1 or np.isclose(1, value))
+            return value
+
+        except AssertionError:
+            print('Value out of [0, 1] bound, will bound it.')
+            larger_than_zero = max(0.0, value)
+            less_than_one = min(1.0, larger_than_zero)
+            return less_than_one
 
     def rbo(self, k=None, p=1.0, ext=False):
         """
@@ -268,6 +275,7 @@ class RankingSimilarity(object):
 class ProgressPrintOut(object):
     """Quick status print out.
     """
+
     def __init__(self, N):
         self._old = 0
         self._total  = N
