@@ -8,6 +8,4 @@ jobs:
       - image: circleci/python:3.6.5
     steps:
       - checkout
-      - run: make package_test
       - run: make test
-      - run: make clean
