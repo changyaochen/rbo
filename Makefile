@@ -8,7 +8,7 @@ RBO_VENV=venv-rbo-package-test
 package_test:
 	rm -rf $(RBO_VENV)
 	pip install virtualenv && virtualenv $(RBO_VENV)
-	source $(RBO_VENV)/bin/activate  && \
+	. $(RBO_VENV)/bin/activate  && \
 	python setup.py sdist && \
 	python setup.py install && \
 	python -c "import rbo; assert rbo.RankingSimilarity([1], [1]).rbo() == 1"
