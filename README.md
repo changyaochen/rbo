@@ -1,4 +1,5 @@
 # Rank-biased Overlap (RBO)
+[![CircleCI](https://circleci.com/gh/changyaochen/rbo/tree/master.svg?style=svg)](https://circleci.com/gh/changyaochen/rbo/tree/master)
 
 This project contains a Python implementation of Rank-Biased Overlap (RBO) from: Webber, William, Alistair Moffat, and Justin Zobel. "A similarity measure for indefinite rankings." ACM Transactions on Information Systems (TOIS) 28.4 (2010): 20." ([Download][paper]).
 
