@@ -7,7 +7,7 @@ RBO_VENV=venv-rbo-package-test
 # CAUTION: this will remove the directory $VENV in the current working directory.
 package_test:
 	rm -rf $(RBO_VENV)
-	pip install virtualenv && virtualenv $(RBO_VENV)
+	pip install virtualenv && virtualenv -p python3 $(RBO_VENV)
 	. $(RBO_VENV)/bin/activate  && \
 	python setup.py sdist && \
 	python setup.py install && \
