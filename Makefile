@@ -7,13 +7,13 @@ RBO_VENV=venv-rbo-package-test
 # CAUTION: this will remove the directory $VENV in the current working directory.
 package_test:
 	rm -rf $(RBO_VENV)
-	pip install virtualenv && virtualenv $(RBO_VENV)
+	pip3 install virtualenv && virtualenv $(RBO_VENV)
 	. $(RBO_VENV)/bin/activate  && \
-	python setup.py sdist && \
-	python setup.py install && \
-	python -c "import rbo; assert rbo.RankingSimilarity([1], [1]).rbo() == 1"
+	python3 setup.py sdist && \
+	python3 setup.py install && \
+	python3 -c "import rbo; assert rbo.RankingSimilarity([1], [1]).rbo() == 1"
 
 test: package_test
 	. $(RBO_VENV)/bin/activate  && \
-	python test.py && \
+	python3 test.py && \
 	rm -rf build dist *.egg-info $(RBO_VENV)

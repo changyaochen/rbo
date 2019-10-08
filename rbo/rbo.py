@@ -278,7 +278,7 @@ class ProgressPrintOut(object):
 
     def __init__(self, N):
         self._old = 0
-        self._total  = N
+        self._total = N
 
     def printout(self, i, delta=10):
         # print out progess every delta %
