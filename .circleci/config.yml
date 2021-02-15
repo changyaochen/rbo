@@ -2,10 +2,6 @@
 version: 2
 jobs:
   build-and-test:
-    branches:
-      only:
-        - master
-        - changyao/*
     docker:
       - image: circleci/python:3.6.5
     steps:
@@ -30,13 +26,17 @@ jobs:
       # Last step, runs our tests ommiting the dependencies path (so we don't take their coverage into account)
       # And send our coverage somewhere, in this case, coveralls
       - run:
-          name: Run Pytest, report coverage
+          name: Run Pytest
           command: |
-            poetry run coverage run --omit="/home/circleci/.cache/pypoetry/virtualenvs" -m pytest
-            poetry run coveralls
+            poetry run pytest ./test/*
 
 workflow:
   version: 2
   build-and-test-workflow:
     jobs:
-      - build-and-test
+      - build-and-test:
+        filters:
+          branches:
+            only:
+              - master
+              - changyao/*
