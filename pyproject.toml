@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rbo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Simple library to calculate Rank-biased Overlap between two lists"
 authors = ["Changyao Chen <changyao.chen@gmail.com>"]
 license = "MIT"

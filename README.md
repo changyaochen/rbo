@@ -7,24 +7,24 @@ This project contains a Python implementation of Rank-Biased Overlap (RBO) from:
 ## Introduction
 
 RBO compares two ranked lists, and returns a numeric value between zero and one to quantify their similarity.
-A RBO value of zero indicates the lists are completely different, and a RBO of one means completely identical. The terms 'different' and 'identical' require a little more clarification. 
+A RBO value of zero indicates the lists are completely different, and a RBO of one means completely identical. The terms 'different' and 'identical' require a little more clarification.
 
 Given two ranked lists:
 
-    A = [a, b, c, d, e]
-    B = [e, d, c, b, a]
+    A = ["a", "b", "c", "d", "e"]
+    B = ["e", "d", "c", "b", "a"]
 
-We can see that both of them rank 5 items (a, b, c, d and e), but with completely opposite order. In this case the similarity between `A` and `B` should (and will) be 0. But here we are ranking the 5 same items, hence they are conjoint. If there is third ranked list
+We can see that both of them rank 5 items ("a", "b", "c", "d" and "e"), but with completely opposite order. In this case the similarity between `A` and `B` should (and will) be 0. But here we are ranking the 5 same items, hence they are conjoint. If there is third ranked list
 
-    C = [f, g, h, i, j]
+    C = ["f", "g", "h", "i", "j"]
 
 which ranks 5 totally different items, then if we ask for the similarity between `A` and `C`, we should expect a value of 0 as well. In such non-conjoint case, we need to be able to calculate a similarity as well.
 
-The RBO measure can handle ranked lists with different lengths as well, with proper extrapolation. For example, the RBO between the list `A` and list 
+The RBO measure can handle ranked lists with different lengths as well, with proper extrapolation. For example, the RBO between the list `A` and list
 
-    D = [a, b, c, d, e, f, g]
+    D = ["a", "b", "c", "d", "e", "f", "g"]
 
-will be 1. 
+will be 1.
 
 
 ## Usage
@@ -33,11 +33,8 @@ will be 1.
 
 To install the RBO module to the current interpreter with Pip:
 
-    pip install -e git+https://github.com/changyaochen/rbo.git@master#egg=rbo
+    pip install rbo
 
-To add the RBO module as managed dependency with Pipenv:
-
-    pipenv install -e git+https://github.com/changyaochen/rbo.git@master#egg=rbo
 
 ### Computing RBO
 
