@@ -35,8 +35,10 @@ workflows:
   build-and-test-workflow:
     jobs:
       - build-and-test:
-        filters:
-          branches:
-            only:
-              - master
-              - changyao/*
+          filters:
+            branches:
+              only:
+                - master
+                - changyao/*
+
+
