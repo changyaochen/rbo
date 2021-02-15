@@ -1,11 +1,36 @@
+# following example here: https://dev.to/jonatasbaldin/a-recipe-for-poetry-and-circleci-1bj6
 version: 2
 jobs:
-  build:
+  build-and-test:
     branches:
       only:
         - master
+        - changyao/*
     docker:
       - image: circleci/python:3.6.5
     steps:
       - checkout
-      - run: make test
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "poetry.lock" }}
+      # Let's install the dependencies
+      - run:
+          name: Install Dependencies
+          command: |
+            poetry install
+      - save_cache:
+          key: deps-{{ checksum "poetry.lock" }}
+          paths:
+            - /home/circleci/.cache/pypoetry/virtualenvs
+      # Another step, run flake8
+      - run:
+          name: Run flake8
+          command: |
+            poetry run flake8 .
+      # Last step, runs our tests ommiting the dependencies path (so we don't take their coverage into account)
+      # And send our coverage somewhere, in this case, coveralls
+      - run:
+          name: Run Pytest, report coverage
+          command: |
+            poetry run coverage run --omit="/home/circleci/.cache/pypoetry/virtualenvs" -m pytest
+            poetry run coveralls
