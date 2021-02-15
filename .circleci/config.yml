@@ -39,6 +39,6 @@ workflows:
             branches:
               only:
                 - master
-                - changyao/*
+                - /^changyao.*/
 
 
