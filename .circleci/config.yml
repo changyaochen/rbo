@@ -28,7 +28,7 @@ jobs:
       - run:
           name: Run Pytest
           command: |
-            poetry run pytest ./test/*
+            poetry run pytest ./tests/*
 
 workflows:
   version: 2
