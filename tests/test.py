@@ -31,20 +31,29 @@ TESTS = [
 ]
 
 
-@pytest.mark.parametrize('S, T, expected', TESTS)
-def test_rbo(S, T, expected):
-    p = 0.95
-    S, T = list(S), list(T)
-    print('List 1 is: {}'.format(S))
-    print('List 2 is: {}'.format(T))
+@pytest.mark.parametrize('list_1, list_2, expected', TESTS)
+def test_rbo(list_1: list, list_2: list, expected: float):
+    """
+    Args:
+        list_1: List 1.
+        list_2: List 2.
+        expected: Expected RBO.
 
-    RS = RankingSimilarity(S, T, verbose=True)
-    rbo = RS.rbo(p=1.0)
+    Returns:
+        None
+    """
+    p = 0.95  # pylint: disable=invalid-name
+    list_1, list_2 = list(list_1), list(list_2)
+    print('List 1 is: {}'.format(list_1))
+    print('List 2 is: {}'.format(list_2))
+
+    rs_object = RankingSimilarity(list_1, list_2, verbose=True)
+    rbo = rs_object.rbo(p=1.0)
     print('The implemented Average Overlap is: {:6.3f}'.format(rbo))
     print('The correct answer is:              {:6.3f}'.format(expected))
     assert np.round(rbo, decimals=3) == expected
 
     print('The implemented rbo_ext 1 is: {:6.3f}'.format(
-        RS.rbo(p=p, k=3, ext=True)))
+        rs_object.rbo(p=p, k=3, ext=True)))
     print('The implemented rbo_ext 2 is: {:6.3f}'.format(
-        RS.rbo_ext(p=p)))
+        rs_object.rbo_ext(p=p)))

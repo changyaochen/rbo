@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rbo"
-version = "0.1.1"
+version = "0.1.2"
 description = "Simple library to calculate Rank-biased Overlap between two lists"
 authors = ["Changyao Chen <changyao.chen@gmail.com>"]
 license = "MIT"
@@ -13,10 +13,11 @@ include = ["LICENSE"]
 [tool.poetry.dependencies]
 python = "^3.7"
 numpy = "^1.18"
-flake8 = "^3.8.4"
-pytest = "^6.2.2"
 
 [tool.poetry.dev-dependencies]
+flake8 = "^3.8.4"
+pytest = "^6.2.2"
+pylint = "^2.6.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
