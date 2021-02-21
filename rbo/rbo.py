@@ -15,7 +15,8 @@ class RankingSimilarity(object):
         T = ['b', 'a', 1, 'd']
 
         Both lists relfect the ranking of the items of interest, for example,
-        list S tells us that item 'a' is ranked first, 'b' is ranked second, etc.
+        list S tells us that item 'a' is ranked first, 'b' is ranked second,
+        etc.
 
         Args:
             S, T (list or numpy array): lists with alphanumeric elements. They
@@ -23,6 +24,8 @@ class RankingSimilarity(object):
                 ranked, i.e., each element's position reflects its respective
                 ranking in the list. Also we will require that there is no
                 duplicate element in each list.
+            verbose (bool). If True, print out intermediate results.
+                Default to False.
         """
 
         assert(type(S) in [list, np.ndarray])
@@ -55,18 +58,18 @@ class RankingSimilarity(object):
         This the weighted non-conjoint measures, namely, rank-biased overlap.
         Unlike Kendall tau which is correlation based, this is intersection
         based.
-        The implementation if from Eq. (4) or Eq. (7) (for p != 1) from the RBO
-        paper: http://www.williamwebber.com/research/papers/wmz10_tois.pdf
+        The implementation if from Eq. (4) or Eq. (7) (for p != 1) from the
+        RBO paper: http://www.williamwebber.com/research/papers/wmz10_tois.pdf
 
-        If p=1, it returns to the un-bounded set-intersection overlap, according
-        to Fagin et al.
+        If p=1, it returns to the un-bounded set-intersection overlap,
+        according to Fagin et al.
         https://researcher.watson.ibm.com/researcher/files/us-fagin/topk.pdf
 
         The fig. 5 in that RBO paper can be used as test case.
-        Note there the choice of p is of great importance, since it essentically
-        control the 'top-weightness'. Simply put, to an extreme, a small p value
-        will only consider first few items, whereas a larger p value will
-        consider more itmes. See Eq. (21) for quantitative measure.
+        Note there the choice of p is of great importance, since it
+        essentically control the 'top-weightness'. Simply put, to an extreme,
+        a small p value will only consider first few items, whereas a larger p
+        value will consider more itmes. See Eq. (21) for quantitative measure.
 
         Args:
             k (int), default None: The depth of evaluation.
@@ -141,8 +144,9 @@ class RankingSimilarity(object):
 
     def rbo_ext(self, p=0.98):
         """
-        This is the ultimate implementation of the rbo, namely, the extrapolated
-        version. The corresponding formula is Eq. (32) in the rbo paper
+        This is the ultimate implementation of the rbo, namely, the
+        extrapolated version. The corresponding formula is Eq. (32) in the rbo
+        paper.
         """
 
         assert(0.0 < p < 1.0)
@@ -162,7 +166,7 @@ class RankingSimilarity(object):
         else:
             S, L = self.S, self.T
 
-        s, l = len(S), len(L)
+        s, l = len(S), len(L)  # noqa
 
         # initilize the overlap and rbo arrays
         # the agreement can be simply calculated from the overlap
@@ -229,8 +233,8 @@ class RankingSimilarity(object):
 
     def top_weightness(self, p=None, d=None):
         """
-        This function will evaluate the degree of the top-weightness of the rbo.
-        It is the implementation of Eq. (21) of the rbo paper.
+        This function will evaluate the degree of the top-weightness of the
+        rbo. It is the implementation of Eq. (21) of the rbo paper.
 
         As a sanity check (per the rbo paper),
         top_weightness(p=0.9, d=10) should be 86%
