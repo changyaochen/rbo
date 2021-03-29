@@ -11,17 +11,17 @@ class RankingSimilarity(object):
         """
         Initialize the object with the required lists.
         Examples of lists:
-        S = ['a', 'b', 'c', 'd', 'e']
-        T = ['b', 'a', 1, 'd']
+        S = ["a", "b", "c", "d", "e"]
+        T = ["b", "a", 1, "d"]
 
         Both lists relfect the ranking of the items of interest, for example,
-        list S tells us that item 'a' is ranked first, 'b' is ranked second,
+        list S tells us that item "a" is ranked first, "b" is ranked second,
         etc.
 
         Args:
             S, T (list or numpy array): lists with alphanumeric elements. They
                 could be of different lengths. Both of the them should be
-                ranked, i.e., each element's position reflects its respective
+                ranked, i.e., each element"s position reflects its respective
                 ranking in the list. Also we will require that there is no
                 duplicate element in each list.
             verbose (bool). If True, print out intermediate results.
@@ -48,7 +48,7 @@ class RankingSimilarity(object):
             return value
 
         except AssertionError:
-            print('Value out of [0, 1] bound, will bound it.')
+            print("Value out of [0, 1] bound, will bound it.")
             larger_than_zero = max(0.0, value)
             less_than_one = min(1.0, larger_than_zero)
             return less_than_one
@@ -67,7 +67,7 @@ class RankingSimilarity(object):
 
         The fig. 5 in that RBO paper can be used as test case.
         Note there the choice of p is of great importance, since it
-        essentically control the 'top-weightness'. Simply put, to an extreme,
+        essentically control the "top-weightness". Simply put, to an extreme,
         a small p value will only consider first few items, whereas a larger p
         value will consider more itmes. See Eq. (21) for quantitative measure.
 
@@ -90,7 +90,7 @@ class RankingSimilarity(object):
             return 0  # one list empty, one non-empty
 
         if k is None:
-            k = float('inf')
+            k = float("inf")
         k = min(self.N_S, self.N_T, k)
 
         # initilize the agreement and average overlap arrays
@@ -120,7 +120,7 @@ class RankingSimilarity(object):
             if self.T[d] in S_running:
                 tmp += 1
             # if the new items are the same, which also means the previous
-            # two cases didn't happen
+            # two cases didn"t happen
             if self.S[d] == self.T[d]:
                 tmp += 1
 
@@ -270,8 +270,8 @@ class RankingSimilarity(object):
                 (np.log(1.0 / (1 - p)) - sum_1)  # here i == d-1
 
         if self.verbose:
-            print('The first {} ranks have {:6.3%} of the weight of '
-                  'the evaluation.'.format(d, top_w))
+            print("The first {} ranks have {:6.3%} of the weight of "
+                  "the evaluation.".format(d, top_w))
 
         return self._bound_range(top_w)
 
@@ -288,11 +288,11 @@ class ProgressPrintOut(object):
         # print out progess every delta %
         cur = 100 * i // self._total
         if cur >= self._old + delta:
-            print('\r', 'Current progress: {} %...'.format(cur), end='')
+            print("\r", "Current progress: {} %...".format(cur), end="")
             self._old = cur
         if i == self._total - 1:
-            print('\r', 'Current progress: 100 %...', end='')
-            print('\nFinished!')
+            print("\r", "Current progress: 100 %...", end="")
+            print("\nFinished!")
 
         return
 
