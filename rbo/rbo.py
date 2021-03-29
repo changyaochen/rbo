@@ -1,59 +1,84 @@
+# pylint: disable=C0103, R0914, R0201
+"""Main module for rbo."""
+from typing import List, Optional, Union
+
 import numpy as np
+from tqdm import tqdm
 
 
-class RankingSimilarity(object):
+class RankingSimilarity:
     """
     This class will include some similarity measures between two different
     ranked lists.
     """
 
-    def __init__(self, S, T, verbose=False):
+    def __init__(
+            self,
+            S: Union[List, np.ndarray],
+            T: Union[List, np.ndarray],
+            verbose=False):
         """
         Initialize the object with the required lists.
         Examples of lists:
-        S = ['a', 'b', 'c', 'd', 'e']
-        T = ['b', 'a', 1, 'd']
+        S = ["a", "b", "c", "d", "e"]
+        T = ["b", "a", 1, "d"]
 
-        Both lists relfect the ranking of the items of interest, for example,
-        list S tells us that item 'a' is ranked first, 'b' is ranked second,
+        Both lists reflect the ranking of the items of interest, for example,
+        list S tells us that item "a" is ranked first, "b" is ranked second,
         etc.
 
         Args:
             S, T (list or numpy array): lists with alphanumeric elements. They
                 could be of different lengths. Both of the them should be
-                ranked, i.e., each element's position reflects its respective
+                ranked, i.e., each element"s position reflects its respective
                 ranking in the list. Also we will require that there is no
                 duplicate element in each list.
             verbose (bool). If True, print out intermediate results.
                 Default to False.
         """
 
-        assert(type(S) in [list, np.ndarray])
-        assert(type(T) in [list, np.ndarray])
+        assert type(S) in [list, np.ndarray]
+        assert type(T) in [list, np.ndarray]
 
-        assert(len(S) == len(set(S)))
-        assert(len(T) == len(set(T)))
+        assert len(S) == len(set(S))
+        assert len(T) == len(set(T))
 
         self.S, self.T = S, T
         self.N_S, self.N_T = len(S), len(T)
         self.verbose = verbose
         self.p = 0.5  # just a place holder
 
-    def _bound_range(self, value):
+
+    def assert_p(self, p: float) -> None:
+        """Make sure p is between (0, 1), if so, assign it to self.p.
+
+        Args:
+            p (float): The value p.
+        """
+        assert 0.0 < p < 1.0, "p must be between (0, 1)"
+        self.p = p
+
+
+    def _bound_range(self, value: float):
         """Bounds the value to [0.0, 1.0].
         """
 
         try:
-            assert(0 <= value <= 1 or np.isclose(1, value))
+            assert (0 <= value <= 1 or np.isclose(1, value))
             return value
 
         except AssertionError:
-            print('Value out of [0, 1] bound, will bound it.')
+            print("Value out of [0, 1] bound, will bound it.")
             larger_than_zero = max(0.0, value)
             less_than_one = min(1.0, larger_than_zero)
             return less_than_one
 
-    def rbo(self, k=None, p=1.0, ext=False):
+
+    def rbo(
+            self,
+            k: Optional[float] = None,
+            p: float = 1.0,
+            ext: bool = False):
         """
         This the weighted non-conjoint measures, namely, rank-biased overlap.
         Unlike Kendall tau which is correlation based, this is intersection
@@ -67,7 +92,7 @@ class RankingSimilarity(object):
 
         The fig. 5 in that RBO paper can be used as test case.
         Note there the choice of p is of great importance, since it
-        essentically control the 'top-weightness'. Simply put, to an extreme,
+        essentically control the "top-weightness". Simply put, to an extreme,
         a small p value will only consider first few items, whereas a larger p
         value will consider more itmes. See Eq. (21) for quantitative measure.
 
@@ -76,7 +101,7 @@ class RankingSimilarity(object):
             p (float), default 1.0: Weight of each agreement at depth d:
                 p**(d-1). When set to 1.0, there is no weight, the rbo returns
                 to average overlap.
-            ext (Boolean) default False: If True, we will extropulate the rbo,
+            ext (Boolean) default False: If True, we will extrapolate the rbo,
                 as in Eq. (23)
 
         Returns:
@@ -90,28 +115,24 @@ class RankingSimilarity(object):
             return 0  # one list empty, one non-empty
 
         if k is None:
-            k = float('inf')
+            k = float("inf")
         k = min(self.N_S, self.N_T, k)
 
-        # initilize the agreement and average overlap arrays
+        # initialize the agreement and average overlap arrays
         A, AO = [0] * k, [0] * k
         if p == 1.0:
             weights = [1.0 for _ in range(k)]
         else:
-            assert(0.0 < p < 1.0)
+            self.assert_p(p)
             weights = [1.0 * (1 - p) * p**d for d in range(k)]
-
-        self.p = p
 
         # using dict for O(1) look up
         S_running, T_running = {self.S[0]: True}, {self.T[0]: True}
         A[0] = 1 if self.S[0] == self.T[0] else 0
         AO[0] = weights[0] if self.S[0] == self.T[0] else 0
 
-        PP = ProgressPrintOut(k) if self.verbose else NoPrintOut()
-        for d in range(1, k):
+        for d in tqdm(range(1, k), disable=~self.verbose):
 
-            PP.printout(d, delta=1)
             tmp = 0
             # if the new item from S is in T already
             if self.S[d] in T_running:
@@ -120,7 +141,7 @@ class RankingSimilarity(object):
             if self.T[d] in S_running:
                 tmp += 1
             # if the new items are the same, which also means the previous
-            # two cases didn't happen
+            # two cases did not happen
             if self.S[d] == self.T[d]:
                 tmp += 1
 
@@ -139,8 +160,9 @@ class RankingSimilarity(object):
 
         if ext and p < 1:
             return self._bound_range(AO[-1] + A[-1] * p**k)
-        else:
-            return self._bound_range(AO[-1])
+
+        return self._bound_range(AO[-1])
+
 
     def rbo_ext(self, p=0.98):
         """
@@ -149,8 +171,7 @@ class RankingSimilarity(object):
         paper.
         """
 
-        assert(0.0 < p < 1.0)
-        self.p = p
+        self.assert_p(p)
 
         if not self.N_S and not self.N_T:
             return 1  # both lists are empty
@@ -168,7 +189,7 @@ class RankingSimilarity(object):
 
         s, l = len(S), len(L)  # noqa
 
-        # initilize the overlap and rbo arrays
+        # initialize the overlap and rbo arrays
         # the agreement can be simply calculated from the overlap
         X, A, rbo = [0] * l, [0] * l, [0] * l
 
@@ -179,22 +200,19 @@ class RankingSimilarity(object):
         rbo[0] = 1.0 * (1 - p) * A[0]
 
         # start the calculation
-        PP = ProgressPrintOut(l) if self.verbose else NoPrintOut()
         disjoint = 0
         ext_term = A[0] * p
 
-        for d in range(1, l):
-            PP.printout(d, delta=1)
-
+        for d in tqdm(range(1, l), disable=~self.verbose):
             if d < s:  # still overlapping in length
 
                 S_running.add(S[d])
                 L_running.add(L[d])
 
                 # again I will revoke the DP-like step
-                overlap_incr = 0  # overlap increament at step d
+                overlap_incr = 0  # overlap increment at step d
 
-                # if the new itmes are the same
+                # if the new items are the same
                 if S[d] == L[d]:
                     overlap_incr += 1
                 else:
@@ -210,7 +228,7 @@ class RankingSimilarity(object):
                 A[d] = 2.0 * X[d] / (len(S_running) + len(L_running))
                 rbo[d] = rbo[d - 1] + 1.0 * (1 - p) * (p**d) * A[d]
 
-                ext_term = 1.0 * A[d] * p**(d + 1)  # the extropulate term
+                ext_term = 1.0 * A[d] * p**(d + 1)  # the extrapolate term
 
             else:  # the short list has fallen off the cliff
                 L_running.add(L[d])  # we still have the long list
@@ -231,7 +249,11 @@ class RankingSimilarity(object):
 
         return self._bound_range(rbo[-1] + disjoint + ext_term)
 
-    def top_weightness(self, p=None, d=None):
+
+    def top_weightness(
+            self,
+            p: Optional[float] = None,
+            d: Optional[int] = None):
         """
         This function will evaluate the degree of the top-weightness of the
         rbo. It is the implementation of Eq. (21) of the rbo paper.
@@ -241,7 +263,7 @@ class RankingSimilarity(object):
         top_weightness(p=0.98, d=50) should be 86% too
 
         Args:
-            p (float), defalut None: A value between zero and one.
+            p (float), default None: A value between zero and one.
             d (int), default None: Evaluation depth of the list.
 
         Returns:
@@ -249,9 +271,7 @@ class RankingSimilarity(object):
         """
 
         # sanity check
-        if p is None:
-            p = self.p
-        assert (0. < p < 1.0)
+        self.assert_p(p)
 
         if d is None:
             d = min(self.N_S, self.N_T)
@@ -270,33 +290,7 @@ class RankingSimilarity(object):
                 (np.log(1.0 / (1 - p)) - sum_1)  # here i == d-1
 
         if self.verbose:
-            print('The first {} ranks have {:6.3%} of the weight of '
-                  'the evaluation.'.format(d, top_w))
+            print("The first {} ranks have {:6.3%} of the weight of "
+                  "the evaluation.".format(d, top_w))
 
         return self._bound_range(top_w)
-
-
-class ProgressPrintOut(object):
-    """Quick status print out.
-    """
-
-    def __init__(self, N):
-        self._old = 0
-        self._total = N
-
-    def printout(self, i, delta=10):
-        # print out progess every delta %
-        cur = 100 * i // self._total
-        if cur >= self._old + delta:
-            print('\r', 'Current progress: {} %...'.format(cur), end='')
-            self._old = cur
-        if i == self._total - 1:
-            print('\r', 'Current progress: 100 %...', end='')
-            print('\nFinished!')
-
-        return
-
-
-class NoPrintOut(object):
-    def printout(self, i, delta=10):
-        pass
