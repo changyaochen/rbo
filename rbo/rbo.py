@@ -131,8 +131,7 @@ class RankingSimilarity:
         A[0] = 1 if self.S[0] == self.T[0] else 0
         AO[0] = weights[0] if self.S[0] == self.T[0] else 0
 
-        for d in tqdm(range(1, k), disable=~self.verbose):
-
+        for d in tqdm(range(1, k), disable=not self.verbose):
             tmp = 0
             # if the new item from S is in T already
             if self.S[d] in T_running:
@@ -203,7 +202,7 @@ class RankingSimilarity:
         disjoint = 0
         ext_term = A[0] * p
 
-        for d in tqdm(range(1, l), disable=~self.verbose):
+        for d in tqdm(range(1, l), disable=not self.verbose):
             if d < s:  # still overlapping in length
 
                 S_running.add(S[d])
