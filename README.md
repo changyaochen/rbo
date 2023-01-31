@@ -4,8 +4,17 @@
 
 This project contains a Python implementation of Rank-Biased Overlap (RBO) from: Webber, William, Alistair Moffat, and Justin Zobel. "A similarity measure for indefinite rankings." ACM Transactions on Information Systems (TOIS) 28.4 (2010): 20." ([Download][paper]).
 
+- [Rank-biased Overlap (RBO)](#rank-biased-overlap-rbo)
+  - [Introduction](#introduction)
+  - [Usage](#usage)
+    - [Installation using pip](#installation-using-pip)
+    - [Computing RBO](#computing-rbo)
+    - [Computing extrapolated RBO](#computing-extrapolated-rbo)
+- [Development](#development)
 
 ## Introduction
+
+> For a more general introduction, please refer to this blog [post](https://changyaochen.github.io/Comparing-two-ranked-lists/).
 
 RBO compares two ranked lists, and returns a numeric value between zero and one to quantify their similarity.
 A RBO value of zero indicates the lists are completely different, and a RBO of one means completely identical. The terms 'different' and 'identical' require a little more clarification.
@@ -15,11 +24,11 @@ Given two ranked lists:
     A = ["a", "b", "c", "d", "e"]
     B = ["e", "d", "c", "b", "a"]
 
-We can see that both of them rank 5 items ("a", "b", "c", "d" and "e"), but with completely opposite order. In this case the similarity between `A` and `B` should (and will) be 0. But here we are ranking the 5 same items, hence they are conjoint. If there is third ranked list
+We can see that both of them rank 5 items ("a", "b", "c", "d" and "e"), but with completely opposite order. In this case the similarity between `A` and `B` should be larger than 0 (as they contain the same items, namely, conjoint), but smaller than 1 (as the order of the items are different). If there is third ranked list
 
     C = ["f", "g", "h", "i", "j"]
 
-which ranks 5 totally different items, then if we ask for the similarity between `A` and `C`, we should expect a value of 0 as well. In such non-conjoint case, we need to be able to calculate a similarity as well.
+which ranks 5 totally different items, then if we ask for the similarity between `A` and `C`, we should expect a value of 0. In such a non-conjoint case, we need to be able to calculate a similarity as well.
 
 The RBO measure can handle ranked lists with different lengths as well, with proper extrapolation. For example, the RBO between the list `A` and list
 
@@ -30,7 +39,7 @@ will be 1.
 
 ## Usage
 
-### Installation using Pip
+### Installation using pip
 
 To install the RBO module to the current interpreter with Pip:
 
@@ -45,23 +54,34 @@ Below shows how to compute the similarity of two ranked lists S and T:
 ```python
 In [1]: import rbo
 
-In [2]: S = [1, 2, 3]; T = [1, 3, 2]
+In [2]: S = [1, 2, 3]
 
-In [3]: rbo.RankingSimilarity(S, T).rbo()
-Out[3]: 0.8333333333333334
+In [3]: T = [1, 3, 2]
+
+In [4]: rbo.RankingSimilarity(S, T).rbo()
+Out[4]: 0.8333333333333334
 ```
 
-Accepted datatypes are Python lists and Numpy arrays.
+Accepted data types are Python lists and Numpy arrays.
 Using Pandas series is possible using the underlying Numpy array as shown below. This restriction is necessary, because using `[]` on a Pandas series queries the index, which might not number items contiguously, or might even be non-numeric.
 
 ```python
-In [4]: import pandas as pd
+In [1]: import pandas as pd
 
-In [5]: U = pd.Series([1, 3, 2, 4, 5, 6])
+In [2]: import rbo
 
-In [6]: rbo.RankingSimilarity(T, U.values).rbo()
-Out[6]: 1.0
+In [3]: S = [1, 2, 3]
+
+In [4]: U = pd.Series([1, 3, 2])
+
+In [5]: rbo.RankingSimilarity(S, U.values).rbo()
+Out[5]: 0.8333333333333334
 ```
+
+### Computing extrapolated RBO
+There is an extension of the vanilla RBO implementation, in which we extrapolate from the visible lists, and assume that the degree of agreement seen up to depth $k$ is continued indefinitely.
+
+This extrapolated version is implemented as the `RankingSimilarity.rbo_ext()` method.
 
 
 # Development

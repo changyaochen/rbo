@@ -11,12 +11,12 @@ class RankingSimilarity:
     This class will include some similarity measures between two different
     ranked lists.
     """
-
     def __init__(
-            self,
-            S: Union[List, np.ndarray],
-            T: Union[List, np.ndarray],
-            verbose=False):
+        self,
+        S: Union[List, np.ndarray],
+        T: Union[List, np.ndarray],
+        verbose: bool = False,
+    ) -> None:
         """
         Initialize the object with the required lists.
         Examples of lists:
@@ -33,8 +33,7 @@ class RankingSimilarity:
                 ranked, i.e., each element"s position reflects its respective
                 ranking in the list. Also we will require that there is no
                 duplicate element in each list.
-            verbose (bool). If True, print out intermediate results.
-                Default to False.
+            verbose: If True, print out intermediate results. Default to False.
         """
 
         assert type(S) in [list, np.ndarray]
@@ -48,7 +47,6 @@ class RankingSimilarity:
         self.verbose = verbose
         self.p = 0.5  # just a place holder
 
-
     def assert_p(self, p: float) -> None:
         """Make sure p is between (0, 1), if so, assign it to self.p.
 
@@ -58,10 +56,8 @@ class RankingSimilarity:
         assert 0.0 < p < 1.0, "p must be between (0, 1)"
         self.p = p
 
-
-    def _bound_range(self, value: float):
-        """Bounds the value to [0.0, 1.0].
-        """
+    def _bound_range(self, value: float) -> float:
+        """Bounds the value to [0.0, 1.0]."""
 
         try:
             assert (0 <= value <= 1 or np.isclose(1, value))
@@ -73,12 +69,12 @@ class RankingSimilarity:
             less_than_one = min(1.0, larger_than_zero)
             return less_than_one
 
-
     def rbo(
-            self,
-            k: Optional[float] = None,
-            p: float = 1.0,
-            ext: bool = False):
+        self,
+        k: Optional[float] = None,
+        p: float = 1.0,
+        ext: bool = False,
+    ) -> float:
         """
         This the weighted non-conjoint measures, namely, rank-biased overlap.
         Unlike Kendall tau which is correlation based, this is intersection
@@ -86,26 +82,25 @@ class RankingSimilarity:
         The implementation if from Eq. (4) or Eq. (7) (for p != 1) from the
         RBO paper: http://www.williamwebber.com/research/papers/wmz10_tois.pdf
 
-        If p=1, it returns to the un-bounded set-intersection overlap,
+        If p = 1, it returns to the un-bounded set-intersection overlap,
         according to Fagin et al.
         https://researcher.watson.ibm.com/researcher/files/us-fagin/topk.pdf
 
         The fig. 5 in that RBO paper can be used as test case.
         Note there the choice of p is of great importance, since it
-        essentically control the "top-weightness". Simply put, to an extreme,
+        essentially control the "top-weightness". Simply put, to an extreme,
         a small p value will only consider first few items, whereas a larger p
-        value will consider more itmes. See Eq. (21) for quantitative measure.
+        value will consider more items. See Eq. (21) for quantitative measure.
 
         Args:
-            k (int), default None: The depth of evaluation.
-            p (float), default 1.0: Weight of each agreement at depth d:
+            k: The depth of evaluation.
+            p: Weight of each agreement at depth d:
                 p**(d-1). When set to 1.0, there is no weight, the rbo returns
                 to average overlap.
-            ext (Boolean) default False: If True, we will extrapolate the rbo,
-                as in Eq. (23)
+            ext: If True, we will extrapolate the rbo, as in Eq. (23).
 
         Returns:
-            The rbo at depth k (or extrapolated beyond)
+            The rbo at depth k (or extrapolated beyond).
         """
 
         if not self.N_S and not self.N_T:
@@ -162,7 +157,6 @@ class RankingSimilarity:
             return self._bound_range(AO[-1] + A[-1] * p**k)
 
         return self._bound_range(AO[-1])
-
 
     def rbo_ext(self, p=0.98):
         """
@@ -248,7 +242,6 @@ class RankingSimilarity:
                     p**(d + 1)  # last term in Eq. (32)
 
         return self._bound_range(rbo[-1] + disjoint + ext_term)
-
 
     def top_weightness(
             self,
