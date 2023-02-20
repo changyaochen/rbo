@@ -13,42 +13,44 @@ class RankingSimilarity:
     """
     def __init__(
         self,
-        S: Union[List, np.ndarray],
-        T: Union[List, np.ndarray],
+        list_1: Union[List, np.ndarray],
+        list_2: Union[List, np.ndarray],
         verbose: bool = False,
     ) -> None:
         """
-        Initialize the object with the required lists.
+        Initializes the object with the required lists.
         Examples of lists:
-        S = ["a", "b", "c", "d", "e"]
-        T = ["b", "a", 1, "d"]
+        list_1 = ["a", "b", "c", "d", "e"]
+        list_2 = ["b", "a", 1, "d"]
 
         Both lists reflect the ranking of the items of interest, for example,
         list S tells us that item "a" is ranked first, "b" is ranked second,
         etc.
 
         Args:
-            S, T (list or numpy array): lists with alphanumeric elements. They
-                could be of different lengths. Both of the them should be
+            list_1, list_2 (list or numpy array): lists with alphanumeric elements.
+                They could be of different lengths. Both of the them should be
                 ranked, i.e., each element"s position reflects its respective
                 ranking in the list. Also we will require that there is no
                 duplicate element in each list.
-            verbose: If True, print out intermediate results. Default to False.
+            verbose: If True, print out intermediate results.
         """
 
-        assert type(S) in [list, np.ndarray]
-        assert type(T) in [list, np.ndarray]
+        for x in [list_1, list_2]:
+            assert isinstance(x, (list, np.ndarray)), f"The input type {type(x)} is not supported."
 
-        assert len(S) == len(set(S))
-        assert len(T) == len(set(T))
+        assert len(list_1) == len(set(list_1)), "There are duplicated item(s) in input list_1."
+        assert len(list_2) == len(set(list_2)), "There are duplicated item(s) in input list_2."
 
-        self.S, self.T = S, T
-        self.N_S, self.N_T = len(S), len(T)
+        # Below we will refer the lists by S and T, as in the paper
+        self.S, self.T = list_1, list_2
+        self.N_S, self.N_T = len(list_1), len(list_2)
         self.verbose = verbose
         self.p = 0.5  # just a place holder
 
     def assert_p(self, p: float) -> None:
-        """Make sure p is between (0, 1), if so, assign it to self.p.
+        """Makes sure p is between (0, 1), if so, assign it to self.p.
+        Here we don't consider the case where p == 1.
 
         Args:
             p (float): The value p.
@@ -156,6 +158,8 @@ class RankingSimilarity:
         if ext and p < 1:
             return self._bound_range(AO[-1] + A[-1] * p**k)
 
+        print(A)
+        print(AO)
         return self._bound_range(AO[-1])
 
     def rbo_ext(self, p=0.98):
