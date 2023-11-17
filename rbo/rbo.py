@@ -80,11 +80,17 @@ class RankingSimilarity:
         Unlike Kendall tau which is correlation based, this is intersection
         based.
         The implementation if from Eq. (4) or Eq. (7) (for p != 1) from the
-        RBO paper: http://www.williamwebber.com/research/papers/wmz10_tois.pdf
+        RBO paper: 
+        Webber, W., Moffat, A. and Zobel, J., 2010. A similarity measure for
+        indefinite rankings. ACM Transactions on Information Systems (TOIS),
+        28(4), pp.1-38.
+        http://www.williamwebber.com/research/papers/wmz10_tois.pdf
 
         If p = 1, it returns to the un-bounded set-intersection overlap,
-        according to Fagin et al.
-        https://researcher.watson.ibm.com/researcher/files/us-fagin/topk.pdf
+        according to Fagin et al:
+        Fagin, R., Kumar, R. and Sivakumar, D., 2003. Comparing top k lists. 
+        SIAM Journal on discrete mathematics, 17(1), pp.134-160.
+        https://doi.org/10.1137/S0895480102412856
 
         The fig. 5 in that RBO paper can be used as test case.
         Note there the choice of p is of great importance, since it
